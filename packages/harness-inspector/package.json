@@ -1,0 +1,27 @@
+{
+  "name": "@t3tools/harness-inspector",
+  "private": true,
+  "bin": {
+    "harness-inspector": "./src/cli.ts"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/inspect.ts",
+      "import": "./src/inspect.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vp test run --config ../../vite.config.ts --dir .",
+    "inspect": "node src/cli.ts",
+    "install-skill": "node scripts/install-skill.ts"
+  },
+  "dependencies": {
+    "yaml": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}
