@@ -1,0 +1,351 @@
+---
+// Layouts adapted from ReUI dashboard-5 (KPI tiles), chart-19, chart-21 and chart-36,
+// drawn as static SVG. Numbers are the demo-harness fixture, audited before and after one patch.
+const kpis = [
+  { label: "Findings", before: 8, after: 7, note: "open, before → after", tone: "" },
+  { label: "Confirmed", before: 1, after: 0, note: "CI triage now mitigated", tone: "confirmed" },
+  { label: "Probable", before: 4, after: 3, note: "fs on /: rule no longer detects it", tone: "probable" },
+  { label: "Unverifiable", before: 2, after: 2, note: "remote, can't be read", tone: "unverifiable" },
+];
+
+const surfaces = [
+  { name: "MCP servers", before: { probable: 3, unverifiable: 1 }, after: { probable: 2, unverifiable: 1 } },
+  {
+    name: "CI workflows",
+    before: { confirmed: 1, mitigated: 1, unverifiable: 1 },
+    after: { mitigated: 2, unverifiable: 1 },
+  },
+  { name: "Skills", before: { probable: 1 }, after: { probable: 1 } },
+];
+const statuses = ["confirmed", "probable", "mitigated", "unverifiable"] as const;
+const maxPerSurface = 4;
+const total = (counts: Partial<Record<(typeof statuses)[number], number>>) =>
+  Object.values(counts).reduce((sum, n) => sum + n, 0);
+---
+
+<div class="audit">
+  <p class="audit-sample">
+    Sample data from the <code>demo-harness</code> test project, audited before and after one patch. This is not live monitoring.
+  </p>
+
+  <div class="audit-kpis">
+    {
+      kpis.map((kpi) => (
+        <div class="tile audit-kpi">
+          <span class="eyebrow">{kpi.label}</span>
+          <b class:list={[kpi.tone && `tone-${kpi.tone}`]}>
+            {kpi.before} <span>→</span> {kpi.after}
+          </b>
+          <small>{kpi.note}</small>
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="audit-charts">
+    <figure class="tile audit-chart">
+      <figcaption>
+        <b>Findings per audit</b>
+        <span>by status; below zero: no longer detected</span>
+      </figcaption>
+      <svg viewBox="0 0 360 250" role="img" aria-label="Audit 1: 8 open findings. Audit 2: 7 open; the rule no longer detects 1.">
+        <g class="ax">
+          <line x1="44" x2="340" y1="190" y2="190" />
+          <line x1="44" x2="340" y1="154" y2="154" class="grid" />
+          <line x1="44" x2="340" y1="118" y2="118" class="grid" />
+          <line x1="44" x2="340" y1="82" y2="82" class="grid" />
+          <line x1="44" x2="340" y1="46" y2="46" class="grid" />
+          <text x="36" y="194">0</text><text x="36" y="158">2</text><text x="36" y="122">4</text>
+          <text x="36" y="86">6</text><text x="36" y="50">8</text><text x="36" y="212">−1</text>
+        </g>
+        <line x1="125" y1="22" x2="265" y2="28" class="lane" />
+        <circle cx="125" cy="22" r="4" class="lane-dot" /><circle cx="265" cy="28" r="4" class="lane-dot" />
+        <text x="125" y="13" class="lbl" text-anchor="middle">8 open</text>
+        <text x="265" y="16" class="lbl" text-anchor="middle">7 open</text>
+        <rect x="90" y="172" width="70" height="18" class="fill-confirmed" />
+        <rect x="90" y="100" width="70" height="72" class="fill-probable" />
+        <rect x="90" y="82" width="70" height="18" class="fill-mitigated" />
+        <rect x="90" y="46" width="70" height="36" class="fill-unverifiable" />
+        <rect x="230" y="136" width="70" height="54" class="fill-probable" />
+        <rect x="230" y="100" width="70" height="36" class="fill-mitigated" />
+        <rect x="230" y="64" width="70" height="36" class="fill-unverifiable" />
+        <rect x="231" y="191" width="68" height="16" class="fill-closed" />
+        <text x="125" y="234" class="lbl" text-anchor="middle">Audit 1</text>
+        <text x="265" y="234" class="lbl" text-anchor="middle">Audit 2 · after patch</text>
+      </svg>
+      <div class="audit-legend">
+        {statuses.map((status) => <span class:list={["key", `key-${status}`]}>{status}</span>)}
+        <span class="key key-closed">no longer detected</span>
+      </div>
+    </figure>
+
+    <figure class="tile audit-chart">
+      <figcaption>
+        <b>Actionable findings</b>
+        <span>confirmed + probable, audit 1 → audit 2</span>
+      </figcaption>
+      <svg viewBox="0 0 360 250" role="img" aria-label="5 actionable findings: the rule no longer detects 1, 1 now mitigated, 3 left.">
+        <g class="ax">
+          <line x1="30" x2="345" y1="200" y2="200" />
+          <line x1="30" x2="345" y1="140" y2="140" class="grid" />
+          <line x1="30" x2="345" y1="80" y2="80" class="grid" />
+          <text x="22" y="204">0</text><text x="22" y="144">2</text><text x="22" y="84">4</text>
+        </g>
+        <rect x="40" y="50" width="56" height="150" class="fill-probable" />
+        <rect x="121" y="51" width="54" height="28" class="fill-closed" />
+        <rect x="200" y="80" width="56" height="30" class="fill-mitigated" />
+        <rect x="280" y="110" width="56" height="90" class="fill-probable" />
+        <line x1="96" x2="120" y1="50" y2="50" class="link" />
+        <line x1="176" x2="200" y1="80" y2="80" class="link" />
+        <line x1="256" x2="280" y1="110" y2="110" class="link" />
+        <text x="68" y="42" class="lbl" text-anchor="middle">5</text>
+        <text x="148" y="42" class="lbl" text-anchor="middle">−1</text>
+        <text x="228" y="72" class="lbl" text-anchor="middle">−1</text>
+        <text x="308" y="102" class="lbl" text-anchor="middle">3</text>
+        <text x="68" y="220" class="lbl" text-anchor="middle">Audit 1</text>
+        <text x="148" y="220" class="lbl" text-anchor="middle">not detected</text>
+        <text x="148" y="235" class="lbl sub" text-anchor="middle">fs on /</text>
+        <text x="228" y="220" class="lbl" text-anchor="middle">mitigated</text>
+        <text x="228" y="235" class="lbl sub" text-anchor="middle">CI triage</text>
+        <text x="308" y="220" class="lbl" text-anchor="middle">Audit 2</text>
+      </svg>
+    </figure>
+
+    <figure class="tile audit-chart audit-chart--wide">
+      <figcaption>
+        <b>Findings by surface</b>
+        <span>before and after the patch</span>
+      </figcaption>
+      <div class="audit-bars">
+        {
+          surfaces.map((surface) =>
+            (["before", "after"] as const).map((run) => (
+              <div class="audit-row">
+                <span class="audit-row-name">{run === "before" ? surface.name : ""}</span>
+                <span class="audit-row-run">{run}</span>
+                <div class="audit-track">
+                  {statuses.map((status) =>
+                    surface[run][status] ? (
+                      <i class={`bg-${status}`} style={`flex:${surface[run][status]}`} />
+                    ) : null,
+                  )}
+                  <i style={`flex:${maxPerSurface - total(surface[run])}`} />
+                </div>
+                <span class="audit-row-count">{total(surface[run])}</span>
+              </div>
+            )),
+          )
+        }
+        <div class="audit-row">
+          <span class="audit-row-name">Instructions</span>
+          <span class="audit-row-run">rules</span>
+          <div class="audit-track"><i style={`flex:${maxPerSurface}`} /></div>
+          <span class="audit-row-count">0</span>
+        </div>
+      </div>
+      <small class="audit-footnote">
+        Instructions shows 0 because no rule covers injected instructions yet; in a separate injection test the agent found them during review. A finding the rule no longer detects is not proof the risk is gone.
+      </small>
+    </figure>
+  </div>
+</div>
+
+<style>
+  .audit {
+    --s-confirmed: oklch(0.68 0.19 25);
+    --s-probable: var(--warn);
+    --s-mitigated: var(--ok);
+    --s-unverifiable: var(--fg-dim);
+    display: grid;
+    gap: 16px;
+  }
+
+  .audit-sample {
+    color: var(--fg-dim);
+    font-size: 14px;
+  }
+
+  .audit-sample code {
+    font-family: var(--font-mono);
+    color: var(--fg-muted);
+  }
+
+  .audit-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .audit-kpi {
+    padding: 20px;
+    display: grid;
+    gap: 8px;
+    background-image: radial-gradient(var(--border-strong) 1px, transparent 1px);
+    background-size: 12px 12px;
+  }
+
+  .audit-kpi b {
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .audit-kpi b span {
+    color: var(--fg-faint);
+  }
+
+  .audit-kpi small {
+    color: var(--fg-dim);
+    font-size: 13px;
+  }
+
+  .tone-confirmed { color: var(--s-confirmed); }
+  .tone-probable { color: var(--s-probable); }
+  .tone-unverifiable { color: var(--s-unverifiable); }
+
+  .audit-charts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .audit-chart {
+    margin: 0;
+    padding: 20px;
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    min-width: 0;
+  }
+
+  .audit-chart--wide {
+    grid-column: 1 / -1;
+  }
+
+  .audit-chart figcaption {
+    display: grid;
+    gap: 2px;
+  }
+
+  .audit-chart figcaption b {
+    font-weight: 500;
+  }
+
+  .audit-chart figcaption span {
+    color: var(--fg-dim);
+    font-size: 13px;
+  }
+
+  .audit-chart svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .ax line { stroke: var(--fg-faint); stroke-width: 1; }
+  .ax line.grid { stroke: var(--border-strong); stroke-dasharray: 2 3; }
+  .ax text,
+  .lbl { fill: var(--fg-dim); font-family: var(--font-mono); font-size: 11px; }
+  .ax text { text-anchor: end; }
+  .lbl.sub { font-size: 10px; }
+  .lane { stroke: var(--fg-muted); stroke-width: 1.5; }
+  .lane-dot { fill: var(--fg); }
+  .link { stroke: var(--fg-faint); stroke-dasharray: 3 3; }
+
+  .fill-confirmed { fill: var(--s-confirmed); }
+  .fill-probable { fill: var(--s-probable); }
+  .fill-mitigated { fill: var(--s-mitigated); }
+  .fill-unverifiable { fill: var(--s-unverifiable); }
+  .fill-closed { fill: none; stroke: var(--s-mitigated); stroke-width: 1.5; stroke-dasharray: 4 3; }
+
+  .bg-confirmed { background: var(--s-confirmed); }
+  .bg-probable { background: var(--s-probable); }
+  .bg-mitigated { background: var(--s-mitigated); }
+  .bg-unverifiable { background: var(--s-unverifiable); }
+
+  .audit-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--fg-dim);
+  }
+
+  .key::before {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: -1px;
+  }
+
+  .key-confirmed::before { background: var(--s-confirmed); }
+  .key-probable::before { background: var(--s-probable); }
+  .key-mitigated::before { background: var(--s-mitigated); }
+  .key-unverifiable::before { background: var(--s-unverifiable); }
+  .key-closed::before { border: 1.5px dashed var(--s-mitigated); }
+
+  .audit-bars {
+    display: grid;
+    gap: 8px;
+  }
+
+  .audit-row {
+    display: grid;
+    grid-template-columns: 120px 52px minmax(0, 1fr) 24px;
+    gap: 10px;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  .audit-row-run {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-dim);
+  }
+
+  .audit-row-count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .audit-track {
+    display: flex;
+    gap: 2px;
+    height: 14px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: var(--bg-elev);
+  }
+
+  .audit-track i {
+    display: block;
+  }
+
+  .audit-footnote {
+    color: var(--fg-dim);
+    font-size: 13px;
+  }
+
+  @media (max-width: 960px) {
+    .audit-kpis {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .audit-charts {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .audit-row {
+      grid-template-columns: 88px 44px minmax(0, 1fr) 20px;
+    }
+  }
+</style>

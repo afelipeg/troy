@@ -1,0 +1,146 @@
+---
+// Layout adapted from ReUI how-it-works-2, without its drifting tiles and light sweep.
+const steps = [
+  {
+    title: "Select a project",
+    body: "Pick the folder to review. It is read as data, not opened as a project.",
+    tiles: [".mcp.json", "CLAUDE.md", "skills/", ".github/"],
+    action: "Choose folder",
+  },
+  {
+    title: "Inspect",
+    body: "A deterministic inspector reads configuration, instructions, skills, tools, and permissions. It runs nothing from the project. An agent can interpret the report afterwards.",
+    tiles: ["MCP", "skills", "CI", "permissions"],
+    action: "Run inspection",
+  },
+  {
+    title: "Review the evidence",
+    body: "See the file, location, risk, and limitations of each finding.",
+    tiles: [".mcp.json:5", "collect.sh:3", "agent-triage.yml", "agent-review.yml:7"],
+    action: "Open report",
+  },
+  {
+    title: "Fix and re-check",
+    body: "Review the proposed change, approve it, and run another audit to see what the rules still detect.",
+    tiles: ["review diff", "approve", "re-audit", "compare runs"],
+    action: "Review diff",
+  },
+];
+---
+
+<ol class="how-grid">
+  {
+    steps.map((step, index) => (
+      <li class="tile how-card">
+        <div class="how-scene" aria-hidden="true">
+          {step.tiles.map((tile) => (
+            <span class="how-chip">{tile}</span>
+          ))}
+        </div>
+        <div class="how-body">
+          <span class="how-step">Step {index + 1}</span>
+          <h3>{step.title}</h3>
+          <p>{step.body}</p>
+        </div>
+        <div class="how-foot">
+          <span>{step.action}</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .how-grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .how-card {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-width: 0;
+  }
+
+  .how-scene {
+    height: 148px;
+    padding: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--bg-elev);
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+
+  .how-chip {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--fg-muted);
+    padding: 7px 9px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    transform: skewY(-6deg);
+    white-space: nowrap;
+  }
+
+  .how-body {
+    padding: 20px;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+  }
+
+  .how-step {
+    justify-self: start;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--fg-dim);
+    padding: 4px 9px;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+  }
+
+  .how-body h3 {
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .how-body p {
+    color: var(--fg-muted);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .how-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    color: var(--fg-dim);
+    font-size: 13px;
+  }
+
+  @media (max-width: 1180px) {
+    .how-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 620px) {
+    .how-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
